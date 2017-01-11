@@ -10,6 +10,14 @@ namespace Vidly.Controllers
 {
     public class MoviesController : Controller
     {
+        List<Movie> _movies = new List<Movie>()
+        {
+            new Movie() { Name = "Shrek" },
+            new Movie() { Name = "Wall-e" }
+        };
+
+
+
         // GET: Movies/Random
         // Returns a random movie
         public ActionResult Random()
@@ -46,13 +54,9 @@ namespace Vidly.Controllers
         }
 
         // Get: Movies
-        public ActionResult Index(int? pageIndex, string sortBy)
+        public ActionResult Index()
         {
-            int page = pageIndex.HasValue ? pageIndex.Value : 1;
-            string sort = sortBy ?? "name";
-
-            return Content($"pageIndex = {page}; sortBy = {sort}");
-
+            return View(_movies);
         }
 
         // Get: Movies/ByReleaseDate
