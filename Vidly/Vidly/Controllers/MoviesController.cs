@@ -10,13 +10,34 @@ namespace Vidly.Controllers
 {
     public class MoviesController : Controller
     {
-        List<Movie> _movies = new List<Movie>()
+        private ApplicationDbContext _context;
+        public MoviesController()
         {
-            new Movie() { Name = "Shrek" },
-            new Movie() { Name = "Wall-e" }
-        };
+            _context = new ApplicationDbContext();
+        }
 
+        protected override void Dispose(bool disposing)
+        {
+            _context.Dispose();
+            base.Dispose(disposing);
+        }
 
+        // Get: Movies
+        public ActionResult Index()
+        {
+            return View(_context.Movies.Include("Genre"));
+        }
+
+        public ActionResult Details(int id)
+        {
+            Movie m = _context.Movies.Include("Genre").FirstOrDefault(mov => mov.Id == id);
+            if (m != null)
+                return View(m);
+            else
+                return HttpNotFound();
+        }
+
+#region Testing end experimenting part
 
         // GET: Movies/Random
         // Returns a random movie
@@ -53,11 +74,7 @@ namespace Vidly.Controllers
             return Content("id=" + id);
         }
 
-        // Get: Movies
-        public ActionResult Index()
-        {
-            return View(_movies);
-        }
+
 
         // Get: Movies/ByReleaseDate
         // Action uses the Route attribute - the recommended way of declaring custom routes
@@ -67,6 +84,8 @@ namespace Vidly.Controllers
         {
             return Content(year + "/" + month);
         }
+
+        #endregion
 
 
     }

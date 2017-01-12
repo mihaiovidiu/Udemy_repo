@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -9,27 +10,29 @@ namespace Vidly.Controllers
 {
     public class CustomersController : Controller
     {
-        List<Customer> _customers = new List<Customer>()
-            {
-                new Customer() {Name = "John Smith", Id = 1 },
-                new Customer() {Name = "Mary Wiliams", Id = 2 }
-            };
+        private ApplicationDbContext _context;
 
-        // here I test the no customers scenario.
-        // List<Customer> _customers = new List<Customer>(); 
+        public CustomersController()
+        {
+            _context = new ApplicationDbContext();
+        }
 
-
+        protected override void Dispose(bool disposing)
+        {
+            _context.Dispose();
+            base.Dispose(disposing);
+        }
 
         // GET: Customers
         public ActionResult Index()
         {
-            
-            return View(_customers);
+            var customers = _context.Customers.Include(c => c.MembershipType);
+            return View(customers);
         }
 
         public ActionResult Details(int id)
         {
-            Customer cust = _customers.FirstOrDefault(c => { return c.Id == id; });
+            Customer cust = _context.Customers.Include(c => c.MembershipType).SingleOrDefault(c => c.Id == id);
             if (cust != null)
                 return View(cust);
             else

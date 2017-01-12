@@ -13,11 +13,13 @@
 <table class="table table-bordered table-hover">
     <tr>
         <th>Movie</th>
+        <th>Genre</th>
     </tr>
     @foreach (Movie m in Model)
     {
         <tr>
-            <td>@m.Name</td>
+            <td>@Html.ActionLink(m.Name, "Details", new { id = m.Id })</td>
+            <td>@m.Genre.Name</td>
         </tr>
     }
 </table>
