@@ -28,13 +28,57 @@ namespace Vidly.Controllers
             return View(_context.Movies.Include("Genre"));
         }
 
-        public ActionResult Details(int id)
+        public ActionResult New()
         {
-            Movie m = _context.Movies.Include("Genre").FirstOrDefault(mov => mov.Id == id);
-            if (m != null)
-                return View(m);
+            var allTheGenres = _context.Genres.ToList();
+            var viewModel = new MovieFormViewModel()
+            {
+                Genres = allTheGenres,
+                ViewHeading = "New Movie"
+            };
+            return View("MovieForm", viewModel);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var allTheGenres = _context.Genres.ToList();
+            // Get movie from db
+            var movie = _context.Movies.Find(id);
+            if (movie != null)
+            {
+                var viewModel = new MovieFormViewModel()
+                {
+                    Genres = allTheGenres,
+                    ViewHeading = "Edit Movie",
+                    Movie = movie
+                };
+                return View("MovieForm", viewModel);
+            }
             else
                 return HttpNotFound();
+        }
+
+        [HttpPost]
+        public ActionResult Save(Movie movie)
+        {
+            movie.DateAdded = DateTime.Now.Date;
+            if (movie.Id == 0)
+            {
+                // Add movie to database
+                _context.Movies.Add(movie);
+            }
+            else
+            {
+                // Get movie from db
+                var movieFromDb = _context.Movies.Find(movie.Id);
+                // Edit movie
+                movieFromDb.GenreId = movie.GenreId;
+                movieFromDb.Name = movie.Name;
+                movieFromDb.NumberInStock = movie.NumberInStock;
+                movieFromDb.ReleaseDate = movie.ReleaseDate;
+            }
+            _context.SaveChanges();
+            return RedirectToAction("Index");
         }
 
 #region Testing end experimenting part
@@ -68,12 +112,6 @@ namespace Vidly.Controllers
 
         }
 
-        // Get: Movies/Edit
-        public ActionResult Edit(int id)
-        {
-            return Content("id=" + id);
-        }
-
 
 
         // Get: Movies/ByReleaseDate
@@ -83,6 +121,15 @@ namespace Vidly.Controllers
         public ActionResult ByReleaseDate(int year, int month)
         {
             return Content(year + "/" + month);
+        }
+
+        public ActionResult Details(int id)
+        {
+            Movie m = _context.Movies.Include("Genre").FirstOrDefault(mov => mov.Id == id);
+            if (m != null)
+                return View(m);
+            else
+                return HttpNotFound();
         }
 
         #endregion
