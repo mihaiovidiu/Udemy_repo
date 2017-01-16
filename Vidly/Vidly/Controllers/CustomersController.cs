@@ -48,8 +48,17 @@ namespace Vidly.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Save(Customer customer)
         {
+            // Check if input from user is valid
+            if (!ModelState.IsValid)
+            {
+                // input not valid - return to the user the same page
+                var membershipTypes = _context.MembershipTypes.ToList();
+                var viewModel = new CustomerFormViewModel() { MembershipTypes = membershipTypes, Customer = customer };
+                return View("CustomerForm", viewModel);
+            }
             if (customer.Id == 0)
             {
                 // New customer 
