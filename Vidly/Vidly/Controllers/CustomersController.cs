@@ -27,8 +27,11 @@ namespace Vidly.Controllers
         // GET: Customers
         public ActionResult Index()
         {
-            var customers = _context.Customers.Include(c => c.MembershipType);
-            return View(customers);
+            // No need to return the list of customers, jquery datatable plugin will make ajax request to the /api/Customers
+            //var customers = _context.Customers.Include(c => c.MembershipType);
+            //return View(customers);
+
+            return View();
         }
 
         public ActionResult Details(int id)
