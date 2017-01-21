@@ -1,9 +1,4 @@
-﻿@using Vidly.Models;
-
-@model IEnumerable<Movie>
-
-
-@{
+﻿@{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -38,7 +33,9 @@
 {
     <script>
         $(document).ready(function () {
-            $("#movies-table").DataTable({
+            // Display table using jqueryTables
+            var movieTable = $("#movies-table").DataTable({
+                // Make ajax call to get the movies as json data
                 ajax: {
                     url: "/api/movies",
                     dataSrc: ""
@@ -50,7 +47,9 @@
                             return "<a href='/movies/edit/" + row.id + "'>" + data + "</a>";
                         }
                     },
-                    { data: "genreId" },
+                    {
+                        data: "genre.name"
+                    },
                     {
                         data: "id",
                         render: function (data) {
@@ -59,12 +58,20 @@
                     }
                 ]
             });
+            // setup the event handler for all the delete buttons click event
             $("#movies-table").on("click", ".js-delete", function () {
-                var button = $("this");
+                var button = $(this);
                 bootbox.confirm("Are you sure do you want to delete this movie?", function (result) {
                     if (result)
                     {
-                        alert("this movie will be deleted!(id = " + button.attr("data-movie-id") + ")");
+                        // make ajax request to /api/movies/delete/id
+                        $.ajax({
+                            url: "/api/movies/" + button.attr("data-movie-id"),
+                            method: "DELETE",
+                            success: function () {
+                                movieTable.row(button.parents("tr")).remove().draw();
+                            }
+                        });
                     }
                 })
                 
