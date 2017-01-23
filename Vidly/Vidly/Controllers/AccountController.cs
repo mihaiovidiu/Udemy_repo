@@ -10,6 +10,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Vidly.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Vidly.ViewModels;
 
 namespace Vidly.Controllers
 {
@@ -155,7 +156,8 @@ namespace Vidly.Controllers
                 var user = new ApplicationUser {
                     UserName = model.Email,
                     Email = model.Email,
-                    DrivingLicence = model.DrivingLicense
+                    DrivingLicence = model.DrivingLicense,
+                    Phone = model.Phone
                 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -384,7 +386,8 @@ namespace Vidly.Controllers
                 {
                     UserName = model.Email,
                     Email = model.Email,
-                    DrivingLicence = model.DrivingLicense
+                    DrivingLicence = model.DrivingLicense,
+                    Phone = model.Phone
                 };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
