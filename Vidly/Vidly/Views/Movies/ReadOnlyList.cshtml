@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Movies</h2>
+
+<table id="movies-table" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Movie</th>
+            <th>Genre</th>
+        </tr>
+    </thead>
+    <tbody>
+        @*@foreach (Movie m in Model)
+        {
+            <tr>
+                <td>@Html.ActionLink(m.Name, "Edit", new { id = m.Id })</td>
+                <td>@m.Genre.Name</td>
+                <td>Delete link</td>
+            </tr>
+        }*@
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            // Display table using jqueryTables
+            var movieTable = $("#movies-table").DataTable({
+                // Make ajax call to get the movies as json data
+                ajax: {
+                    url: "/api/movies",
+                    dataSrc: ""
+                },
+                columns: [
+                    {
+                        data: "name",
+                    },
+                    {
+                        data: "genre.name"
+                    },
+                ]
+            });
+        });
+    </script>
+}
