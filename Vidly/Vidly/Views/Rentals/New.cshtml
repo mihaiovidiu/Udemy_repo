@@ -1,0 +1,136 @@
+﻿@using Vidly.Models
+
+@model Rental
+
+@{
+    ViewBag.Title = "New Rental Form";
+}
+
+<h2>New Rental Form</h2>
+
+<form id="newRental">
+    <div class="form-group">
+        <label>Customer</label>
+        <div class="tt-container">
+            <input id="customer" name="customer" required data-rule-validCustomer type="text" value="" class="form-control" />
+
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Movie</label>
+        <div class="tt-container">
+            <input id="movie" name="movie" data-rule-movieExists type="text" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <ul id="movies" class="list-group"></ul>
+        </div>
+    </div>
+    
+    <button class="btn btn-primary">Submit</button>
+</form>
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval");
+    <script>
+        $(document).ready(function () {
+
+            var vm = {
+                movieIds: []
+            };
+
+            // customer autocompletion
+            var customers = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '../api/customers?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#customer').typeahead(
+                {
+                    minLength: 3,
+                    highlight: true
+                },
+                {
+                    name: 'customers',
+                    display: 'name',
+                    source: customers
+                }).on("typeahead:select", function (e, customer) {
+                    vm.customerId = customer.id;
+                });
+
+            // movie autocompletion
+            var movies = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '../api/movies?name=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#movie').typeahead(
+                {
+                    minLength: 3,
+                    highlight: true
+                },
+                {
+                    name: 'movies',
+                    display: 'name',
+                    source: movies
+                }).on("typeahead:select", function (e, movie) {
+                    $("#movies").append("<li class='list-group-item'>" + movie.name + "</li>");
+                    // reset the text after selection
+                    $("#movie").typeahead("val", "");
+                    vm.movieIds.push(movie.id);
+                });
+
+            // create a custom validator for an invalid customer
+            $.validator.addMethod("validCustomer", function () {
+                // ensure that vm (viewModel) has a property named customerId and customerId != 0
+                return vm.customerId && vm.customerId != 0;
+            }, "Please select a valid customer.");
+
+            // create a custom validator that ensures that at least a movie is selected
+            $.validator.addMethod("movieExists", function () {
+                return vm.movieIds.length > 0;
+            }, "Please select a movie to rent");
+
+            // validate the form
+            var validator = $("#newRental").validate({
+                // this will be called on submit
+                submitHandler: function (form, event) {
+                    // prevent the form from submitting normally
+                    console.log(event);
+                    event.preventDefault();
+                    $.ajax({
+                        url: "/api/newRentals",
+                        method: "post",
+                        data: vm
+
+                    }).done(function () {
+                        toastr.success("Rentals successfully recorded.")
+                        // clear the form
+                        $("#customer").typeahead("val", "");
+                        $("#movie").typeahead("val", "");
+                        $("#movies").empty();
+                        // reinitialize the viewmodel
+                        vm = {
+                            movieIds: []
+                        };
+                        // reset the validation on the form
+                        validator.resetForm();
+                    }).fail(function () {
+                        toastr.error("Something undexpected happened.");
+                    });
+                }
+            });
+        });
+    </script>
+}
+
